@@ -1,2 +1,2 @@
 # 668-R-Projects
-R Projects from 668 Advanced Biological Data Analysis
+R Projects from BIO668 Advanced Biological Data Analysis
