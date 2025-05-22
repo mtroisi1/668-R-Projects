@@ -1,0 +1,156 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r, read in data and normality check}
+d=read.table("RTestData.txt", header=TRUE)
+
+d
+
+hist(d$strep)
+hist(d$prev)
+hist(d$lepto)
+hist(d$fuso)
+hist(d$veil)
+hist(d$deepest)
+
+
+
+
+
+
+
+```
+```{r, normality check cont.}
+qqnorm(d$strep)
+qqline(d$strep)
+
+qqnorm(d$prev)
+qqline(d$prev)
+
+qqnorm(d$lepto)
+qqline(d$lepto)
+
+qqnorm(d$fuso)
+qqline(d$fuso)
+
+qqnorm(d$veil)
+qqline(d$veil)
+
+qqnorm(d$deepest)
+qqline(d$deepest)
+
+```
+```{r, data transformation}
+strep = sqrt(d$strep)
+prev = sqrt(d$prev)
+lepto = sqrt(d$lepto)
+fuso = sqrt(d$fuso)
+veil = sqrt(d$veil)
+deepest = sqrt(d$deepest)
+
+hist(strep)
+hist(prev)
+hist(lepto)
+hist(fuso)
+hist(veil)
+hist(deepest)
+
+```
+```{r, one way anova, summary and boxplots}
+time <- as.factor(d$time)
+model <- aov(lepto~time)
+
+summary(model)
+anova(model)
+boxplot(lepto~time)
+
+model1 <- aov(strep~time)
+
+summary(model1)
+anova(model1)
+boxplot(strep~time)
+```
+```{r, correlation analysis}
+cor.test(prev, strep)
+cor.test(fuso, strep)
+cor.test(lepto, fuso)
+```
+```{r, linear regressions}
+
+model2 <- lm(strep ~ deepest)
+
+plot(deepest, strep)
+abline(model2, col = 'red', lwd = 2)
+```
+```{r, ggplot2}
+ggplot(d, aes(x = prev)) +
+  geom_histogram(bins = 8)
+
+ggplot(d, aes(x=deepest, y=strep, color=time)) +
+  geom_point() +
+  labs(x="Deepest", y='Strep', color='Time') +
+  theme_minimal()
+
+ggplot(d, aes(x=deepest, y=fuso)) +
+  geom_point() +
+  labs(x="Deepest", y='Fuso') +
+  theme_minimal()
+
+ggplot(d, aes(x=deepest, y=fuso)) +
+  geom_point() +
+  geom_smooth(method=lm)
+  labs(x="Deepest", y='Fuso') +
+  theme_minimal()
+
+
+#ggplot(d, aes(x = deepest, y = strep)) +
+  #geom_point() +
+  #geom_smooth(method = "lm", col = "red")
+
+```
+```{r, Vegan Analysis}
+
+new_data <- d[2:6] 
+shannon <- diversity(new_data)
+print(shannon)
+
+spAbund <- rowSums(round(new_data))
+raremin <- min(rowSums(new_data)) 
+sRare <- rarefy(round(new_data), raremin)
+rarecurve(round(new_data), col = "blue")
+
+bray = vegdist(new_data, "bray") 
+hist(bray, xlim = range(0.0,1.0))
+```
+```{r, Vegan MDS}
+is.factor(d$status)
+new_data.mds <- metaMDS(comm = new_data, distance = "bray", trace = FALSE, autotransform = FALSE)
+plot(new_data.mds$points)
+
+MDS_xy <- data.frame(new_data.mds$points)
+MDS_xy$status <- as.factor(d$status)
+MDS_xy$time <- as.factor(d$time)
+
+ggplot(MDS_xy, aes(MDS1, MDS2, color = status)) +
+  geom_point() +
+  theme_bw()
+
+ggplot(MDS_xy, aes(MDS1, MDS2, color = time)) +
+  geom_point() +
+  theme_bw()
+```
+
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
